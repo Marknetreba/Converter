@@ -1,0 +1,74 @@
+#Guide
+
+### Description
+
+**Name:** Exchange converter
+
+**Author:** Mark Netreba, mark.netreba@mail.ru
+
+**Main technologies:** Java 11, Spring 5, Spring Boot 2, Spring WebFlux, Spring JPA
+
+### Sctructure
+
+/src/main
+    
+    .../java
+
+            /com.converter - main directory with start point of application (ConverterApplication.class).
+            Plus here we have ConverterController with all possible endpoints.
+            
+            /models - classes that describe our data: ConversionRequest, ConversionResponce, 
+            Currency (raw response from external provider).
+            
+            /repositories_entities - test directory with possible JPA repos. 
+            Here i've added class that desribes our table in in-memmory H2 DB.
+            
+            /security - configuration classes for whole application. 
+            
+            /utils - directory with utility functions.
+    
+    .../resources
+            
+            application.properties - contains our credentials for H2 DB.
+
+
+### Usage scenario
+
+**Existing endpoints:** 
+* /exchange_rate - GET request for returning all rates from external provider
+* /currency/convert - POST request for currency conversion
+
+**Examples:**
+
+Application Start:
+
+* Via IDE;
+* Via Maven:  `mvn spring-boot:run` (the command should be executed in dir with ConverterApplication.class)
+
+GET request: `curl localhost:8080/exchange_rate`
+
+POST request: 
+`curl -H "Content-Type: application/json" --data '{"from":"EUR","to":"USD","amount":5.5}' localhost:8080/currency/convert`
+
+For request could be used some rest api tools, like Postman or Insomnia.
+
+### Caching of exchange rates and saving to DB (or maybe some other data source)
+
+This functionality is done here `./utils/SchedulerCacheDB.class`
+
+Since we have a chance not to get exchange rates from external provider, i suggest to save rates in DB periodically. 
+For example: we can save rates each hour, so we can be sure, that our service has some available data to work with.
+
+### Security (just briefly introduced in the project)
+
+For security purposes we are using Spring Security 5 with it's features like @EnableReactiveMethodSecurity,
+which allows us to define the Roles, Permissions that have access to endpoints for example.
+
+### Testing
+
+For testing purposes we are using ProjectReactor and it's reactor-test + @WebFluxTest annotation and WebTestClient,
+which is used to test webflux endpoints with Junit 5.
+
+Possible tests for further implementation are located in src/test directory.
+
+For successful running of Tests, need to add entityManager configuration.
